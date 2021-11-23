@@ -147,46 +147,50 @@ def DST(input_im, content_im, style_im, extractor, content_path, style_path,
             ell_warp_TV = TV(warp_field)
 
             # Extract VGG features of warped and unwarped stylized images
-            feat_result_warped = extractor(new_im)
-            feat_result_unwarped = extractor(curr_im)
+            #feat_result_warped = extractor(new_im)
+            #feat_result_unwarped = extractor(curr_im)
 
             # Sample features to calculate losses with
             n = 2048
             if i % 1 == 0 and i != 0:
                 np.random.shuffle(xx)
                 np.random.shuffle(xy)
-            spatial_result_warped, spatial_content = spatial_feature_extract(feat_result_warped, feat_content, xx[:n], xy[:n])
-            spatial_result_unwarped, _ = spatial_feature_extract(feat_result_unwarped, feat_content, xx[:n], xy[:n])
+            #spatial_result_warped, spatial_content = spatial_feature_extract(feat_result_warped, feat_content, xx[:n], xy[:n])
+            #spatial_result_unwarped, _ = spatial_feature_extract(feat_result_unwarped, feat_content, xx[:n], xy[:n])
 
             # Content loss
-            ell_content = content_loss(spatial_result_unwarped, spatial_content)
+            #ell_content = content_loss(spatial_result_unwarped, spatial_content)
 
             # Style loss
 
-            # Lstyle(Unwarped X, S)
-            loss_remd1 = remd_loss(spatial_result_unwarped, spatial_style, cos_d=True)
-            loss_moment1 = moment_loss(spatial_result_unwarped, spatial_style, moments=[1,2])
-            loss_color1 = remd_loss(spatial_result_unwarped[:,:3,:,:], spatial_style[:,:3,:,:], cos_d=False)
-            loss_style1 = loss_remd1 + loss_moment1 + (1./max(content_weight_scaled, 1.))*loss_color1
-
-            # Lstyle(Warped X, S)
-            loss_remd2 = remd_loss(spatial_result_warped, spatial_style, cos_d=True)
-            loss_moment2 = moment_loss(spatial_result_warped, spatial_style, moments=[1,2])
-            loss_color2 = remd_loss(spatial_result_warped[:,:3,:,:], spatial_style[:,:3,:,:], cos_d=False)
-            loss_style2 = loss_remd2 + loss_moment2 + (1./max(content_weight_scaled, 1.))*loss_color2
+            ## Lstyle(Unwarped X, S)
+            #loss_remd1 = remd_loss(spatial_result_unwarped, spatial_style, cos_d=True)
+            #loss_moment1 = moment_loss(spatial_result_unwarped, spatial_style, moments=[1,2])
+            #loss_color1 = remd_loss(spatial_result_unwarped[:,:3,:,:], spatial_style[:,:3,:,:], cos_d=False)
+            #loss_style1 = loss_remd1 + loss_moment1 + (1./max(content_weight_scaled, 1.))*loss_color1
+            #
+            ## Lstyle(Warped X, S)
+            #loss_remd2 = remd_loss(spatial_result_warped, spatial_style, cos_d=True)
+            #loss_moment2 = moment_loss(spatial_result_warped, spatial_style, moments=[1,2])
+            #loss_color2 = remd_loss(spatial_result_warped[:,:3,:,:], spatial_style[:,:3,:,:], cos_d=False)
+            #loss_style2 = loss_remd2 + loss_moment2 + (1./max(content_weight_scaled, 1.))*loss_color2
 
             # Total loss
-            if use_DST:
-                ell_style = loss_style1 + loss_style2
-                ell = content_weight_scaled*ell_content + ell_style + warp_weight*ell_warp + reg_weight*ell_warp_TV
-            else:
-                ell_style = loss_style1
-                ell = content_weight_scaled*ell_content + ell_style
+            #if use_DST:
+            #    ell_style = loss_style1 + loss_style2
+            #    ell = content_weight_scaled*ell_content + ell_style + warp_weight*ell_warp + reg_weight*ell_warp_TV
+            #else:
+            #    ell_style = loss_style1
+            #    ell = content_weight_scaled*ell_content + ell_style
+             
+            #!!!! my bs modifications 
+            ell = warp_weight*ell_warp + reg_weight*ell_warp_TV
+            #!!!!end of my bs modifications
 
             # Record loss values
             ell_list.append(ell.item())
-            ell_content_list.append(ell_content.item())
-            ell_style_list.append(ell_style.item())
+            #ell_content_list.append(ell_content.item())
+            #ell_style_list.append(ell_style.item())
             ell_warp_list.append(ell_warp.item())
             ell_warp_TV_list.append(ell_warp_TV.item())
 
@@ -194,13 +198,13 @@ def DST(input_im, content_im, style_im, extractor, content_path, style_path,
             if i==0 or i%checkpoint_iter == 0:
                 print('   STEP {:03d}: Loss {:04.3f}'.format(i, ell))
                 if verbose:
-                    print('             = alpha*Lcontent {:04.3f}'.format(content_weight_scaled*ell_content))
-                    print('               + Lstyle {:04.3f}'.format(ell_style))
+                    #print('             = alpha*Lcontent {:04.3f}'.format(content_weight_scaled*ell_content))
+                    #print('               + Lstyle {:04.3f}'.format(ell_style))
                     print('               + beta*Lwarp {:04.3f}'.format(warp_weight*ell_warp))
                     print('               + gamma*TV {:04.3f}'.format(reg_weight*ell_warp_TV))
-                if save_intermediate:
-                    plot_intermediate(new_im, content_im_warp, output_dir, output_prefix, colors,
-                                        down_fac, src_Kpts, thetas_Kpts, target_Kpts, scale, i)
+                #if save_intermediate:
+                #    plot_intermediate(new_im, content_im_warp, output_dir, output_prefix, colors,
+                #                        down_fac, src_Kpts, thetas_Kpts, target_Kpts, scale, i)
 
             # Take a gradient step
             ell.backward()
@@ -223,12 +227,12 @@ def DST(input_im, content_im, style_im, extractor, content_path, style_path,
 
     # Optionally save loss, keypoints, and optimized warp parameter thetas
     if save_extra:
-        save_plots(im_size, curr_im, new_im, content_im, style_im, output_dir, output_prefix, style_path, style_pts_path, colors,
-                    src_Kpts, src_Kpts_aug, dst_Kpts*sizes, dst_Kpts_aug, target_Kpts, target_Kpts_o, border_Kpts, device)
-        save_loss(output_dir, output_prefix, content_weight, warp_weight, reg_weight, max_iter, scale_list,
-                    ell_list, ell_style_list, ell_content_list, ell_warp_list, ell_warp_TV_list)
-        save_points(output_dir, output_prefix, src_Kpts, dst_Kpts*sizes, src_Kpts_aug*sizes,
-                    dst_Kpts_aug*sizes, target_Kpts, thetas_Kpts)
-
+        #save_plots(im_size, curr_im, new_im, content_im, style_im, output_dir, output_prefix, style_path, style_pts_path, colors,
+        #            src_Kpts, src_Kpts_aug, dst_Kpts*sizes, dst_Kpts_aug, target_Kpts, target_Kpts_o, border_Kpts, device)
+        #save_loss(output_dir, output_prefix, content_weight, warp_weight, reg_weight, max_iter, scale_list,
+        #            ell_list, ell_style_list, ell_content_list, ell_warp_list, ell_warp_TV_list)
+        #save_points(output_dir, output_prefix, src_Kpts, dst_Kpts*sizes, src_Kpts_aug*sizes,
+        #            dst_Kpts_aug*sizes, target_Kpts, thetas_Kpts)
+        pass
     # Return the stylized output image
     return new_im

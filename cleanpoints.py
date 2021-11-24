@@ -227,7 +227,8 @@ def clean_points(content_path, style_path, content_pts_path, style_pts_path, act
     # Repeat because there can be new crossing points after re-alignment
     B_selected_new = get_target_pts(A_selected, B_selected)
     A_selected, B_selected, B_selected_new, act_selected = remove_crossing(A_selected, B_selected, B_selected_new, act_selected)
-    print('\n{} points remaining after removing crossing points'.format(A_selected.shape[0]))
+    remaining_points = A_selected.shape[0]
+    print('\n{} points remaining after removing crossing points'.format(remaining_points))
 
     # Get final target points
     B_selected_new = get_target_pts(A_selected, B_selected)
@@ -303,3 +304,5 @@ def clean_points(content_path, style_path, content_pts_path, style_pts_path, act
     end_time = time.time()
     total_time = end_time - start_time
     print('\nFinished after {:04.3f} seconds'.format(total_time))
+
+    return remaining_points

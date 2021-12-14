@@ -445,11 +445,11 @@ class sparse_semantic_correspondence():
             for i in range(len(filtered_correspondence[2])):
                 opt_file.write('%f\n' % (filtered_correspondence[2][i]))
 
-        # top_k_correspondence = self.top_k_in_clusters(filtered_correspondence, self.k_final)
-        # draw.draw_correspondence(self.A, self.B, top_k_correspondence, self.draw_radius[self.L_final-1], self.save_dir, name='_top_'+str(self.k_final), datarootA=datarootA, datarootB=datarootB)
-        # self.save_correspondence_as_txt(top_k_correspondence, name='_top_'+str(self.k_final), datarootA=datarootA, datarootB=datarootB)
-        # with open(os.path.join(self.save_dir, 'correspondence_activation_top' + '.txt'), 'wt') as opt_file:
-        #     for i in range(len(top_k_correspondence[2])):
-        #         opt_file.write('%f\n' % (top_k_correspondence[2][i]))
+        top_k_correspondence = self.top_k_in_clusters(filtered_correspondence, self.k_final)
+        draw.draw_correspondence(self.A, self.B, top_k_correspondence, self.draw_radius[self.L_final-1], self.save_dir, name='_top_'+str(self.k_final), datarootA=datarootA, datarootB=datarootB)
+        self.save_correspondence_as_txt(top_k_correspondence, name='_top_'+str(self.k_final), datarootA=datarootA, datarootB=datarootB)
+        with open(os.path.join(self.save_dir, 'correspondence_activation_top' + '.txt'), 'wt') as opt_file:
+            for i in range(len(top_k_correspondence[2])):
+                opt_file.write('%f\n' % (top_k_correspondence[2][i]))
 
         return scaled_correspondence
